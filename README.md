@@ -19,6 +19,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | Episode | Video | Tag |
 |---|---|---|
 | 1 | How does a compiler work? The six phases, step by step | `episode-01` |
+| 2 | Compiler vs interpreter vs JIT: what linker and loader do | `episode-02` |
 
 To see the code of one episode: `git checkout episode-04`
 
