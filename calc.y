@@ -25,8 +25,8 @@ void yyerror(const char *s) {
  * From this, y.tab.h gets the data type YYSTYPE and the variable yylval,
  * into which the lexer writes the values (yylval.num, yylval.name). */
 %union {
-    int   num;    /* for numbers */
-    char *name;   /* for variable names */
+    double num;   /* for numbers, e.g. 10 or 10.5 */
+    char  *name;  /* for variable names */
 }
 
 /* %token declares the token types the lexer may return.
@@ -68,7 +68,7 @@ line    : IDENT ASSIGN expr NEWLINE
               *   $2 = ASSIGN    -> has no value
               *   $3 = expr  -> the result of the calculation, e.g. 3
               *   $4 = NEWLINE   -> has no value                       */
-             printf("%s = %d\n", $1, $3);
+             printf("%s = %g\n", $1, $3);
 
              /* The lexer copied the name with strdup(),
               * so we free that memory here. */
@@ -84,7 +84,7 @@ line    : IDENT ASSIGN expr NEWLINE
  * yacc works bottom-up, though, and has no problem with it. */
 expr : expr MINUS term
       	   {
-              printf("  reduce     expr   -> expr - term        (%d - %d = %d)\n", $1, $3, $1 - $3);
+              printf("  reduce     expr   -> expr - term        (%g - %g = %g)\n", $1, $3, $1 - $3);
       	     $$ = $1 - $3;
       	   }
 
@@ -95,28 +95,28 @@ expr : expr MINUS term
               * $2 = PLUS (no value)
               * $3 = the new term (e.g. 2)
               * Result: 1 + 2 = 3 becomes the value of this expression. */
-            printf("  reduce     expr   -> expr + term        (%d + %d = %d)\n", $1, $3, $1 + $3);
+            printf("  reduce     expr   -> expr + term        (%g + %g = %g)\n", $1, $3, $1 + $3);
              $$ = $1 + $3;
            }
          | term
            {
              /* Smallest case: a single term is already an
               * expression. Its value is simply the term's value. */
-            printf("  reduce     expr   -> term               (%d)\n", $1);
+            printf("  reduce     expr   -> term               (%g)\n", $1);
              $$ = $1;
            }
          ;
 
 term : term TIMES factor
-        {printf("  reduce     term   -> term * factor      (%d * %d = %d)\n", $1, $3, $1 * $3);
+        {printf("  reduce     term   -> term * factor      (%g * %g = %g)\n", $1, $3, $1 * $3);
           $$ = $1 * $3;}
       | term DIVIDE factor
-        {printf("  reduce     term   -> term / factor      (%d / %d = %d)\n", $1, $3, $1 / $3);$$ = $1 / $3;}
+        {printf("  reduce     term   -> term / factor      (%g / %g = %g)\n", $1, $3, $1 / $3);$$ = $1 / $3;}
       | factor
-        {printf("  reduce     term   -> factor             (%d)\n", $1);$$ = $1;}
+        {printf("  reduce     term   -> factor             (%g)\n", $1);$$ = $1;}
 
-factor : NUMBER {printf("  reduce     factor -> NUMBER             (%d)\n", $1);$$ = $1;}
-      | LPAREN expr RPAREN {printf("  reduce     factor -> ( expr )           (%d)\n", $2);$$ = $2;}
+factor : NUMBER {printf("  reduce     factor -> NUMBER             (%g)\n", $1);$$ = $1;}
+      | LPAREN expr RPAREN {printf("  reduce     factor -> ( expr )           (%g)\n", $2);$$ = $2;}
 
 %%
 /* ================================================================

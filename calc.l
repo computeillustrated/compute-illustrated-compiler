@@ -10,7 +10,7 @@
 %option noyywrap
 
 %%
-[0-9]+      { yylval.num = atoi(yytext); TOKEN(NUMBER); }
+[0-9]+(\.[0-9]+)? { yylval.num = atof(yytext); TOKEN(NUMBER); }
 [a-zA-Z][a-zA-Z0-9]* { yylval.name = strdup(yytext); TOKEN(IDENT); }
 "+"         { TOKEN(PLUS); }
 "-"	    	{ TOKEN(MINUS); }
