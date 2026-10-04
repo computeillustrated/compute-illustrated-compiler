@@ -1,0 +1,27 @@
+# compute-illustrated-compiler
+
+A small calculator built with lex and yacc that grows, episode by episode, into a tiny compiler.
+It is the running example of the YouTube channel **Compute Illustrated**: every video shows what
+this code really does, and every episode has a tag with the code exactly as it is in the video.
+
+## Run it
+
+You need `lex` (flex), `yacc` (bison) and a C compiler.
+
+```bash
+./run.sh                 # interactive: type a line like  x = 10 + 2 * 3
+./run.sh -d input.txt    # with the parser's trace; the parser states go to y.output
+./stack.sh "x = 1 + 2 * 3"   # walks you through the shift/reduce steps
+```
+
+## Episodes
+
+| Episode | Video | Tag |
+|---|---|---|
+| 1 | How does a compiler work? The six phases, step by step | `episode-01` |
+
+To see the code of one episode: `git checkout episode-04`
+
+## License
+
+MIT, see [LICENSE](LICENSE).
