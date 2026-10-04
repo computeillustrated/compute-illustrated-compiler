@@ -23,6 +23,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 3 | How does a lexer work? Tokens, regular expressions and finite automata | `episode-03` |
 | 4 | Regex to NFA to DFA: Thompson's and the subset construction | `episode-04` |
 | 5 | How to write a lexer by hand: from state diagram to code | `episode-05` |
+| 6 | Lex and flex explained: generate a lexer from regular expressions | `episode-06` |
 
 To see the code of one episode: `git checkout episode-04`
 
