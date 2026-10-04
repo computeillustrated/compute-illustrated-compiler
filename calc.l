@@ -11,7 +11,7 @@
 
 %%
 [0-9]+      { yylval.num = atoi(yytext); TOKEN(NUMBER); }
-[a-zA-Z]+   { yylval.name = strdup(yytext); TOKEN(IDENT); }
+[a-zA-Z][a-zA-Z0-9]* { yylval.name = strdup(yytext); TOKEN(IDENT); }
 "+"         { TOKEN(PLUS); }
 "-"	    	{ TOKEN(MINUS); }
 "*"			{ TOKEN(TIMES);}
