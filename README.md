@@ -30,6 +30,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 10 | How to remove left recursion from a grammar (and left factoring) | `episode-10` |
 | 11 | What is an LL(1) grammar? Lookahead instead of backtracking | `episode-11` |
 | 12 | How to compute FIRST and FOLLOW sets, round by round | `episode-12` |
+| 13 | How a table-driven LL(1) parser works: parse table and stack | `episode-13` |
 
 To see the code of one episode: `git checkout episode-04`
 
