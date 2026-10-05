@@ -25,6 +25,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 5 | How to write a lexer by hand: from state diagram to code | `episode-05` |
 | 6 | Lex and flex explained: generate a lexer from regular expressions | `episode-06` |
 | 7 | Why regex can't match nested parentheses (pumping lemma) | `episode-07` |
+| 8 | What is a context-free grammar? Derivations, parse trees, ambiguity | `episode-08` |
 
 To see the code of one episode: `git checkout episode-04`
 
