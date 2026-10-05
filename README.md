@@ -29,6 +29,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 9 | How does a top-down parser work? Backtracking, step by step | `episode-09` |
 | 10 | How to remove left recursion from a grammar (and left factoring) | `episode-10` |
 | 11 | What is an LL(1) grammar? Lookahead instead of backtracking | `episode-11` |
+| 12 | How to compute FIRST and FOLLOW sets, round by round | `episode-12` |
 
 To see the code of one episode: `git checkout episode-04`
 
