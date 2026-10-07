@@ -33,6 +33,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 13 | How a table-driven LL(1) parser works: parse table and stack | `episode-13` |
 | 14 | How to write a recursive descent parser (one function per rule) | `episode-14` |
 | 15 | How does a bottom-up parser work? Shift, reduce and the handle | `episode-15` |
+| 16 | How a parser knows that * binds tighter than +: operator precedence | `episode-16` |
 
 To see the code of one episode: `git checkout episode-04`
 
