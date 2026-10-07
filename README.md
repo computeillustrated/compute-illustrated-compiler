@@ -35,6 +35,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 15 | How does a bottom-up parser work? Shift, reduce and the handle | `episode-15` |
 | 16 | How a parser knows that * binds tighter than +: operator precedence | `episode-16` |
 | 17 | How does an LR parser work? The automaton behind yacc and bison | `episode-17` |
+| 18 | LR(0) items, closure and goto: building an SLR parse table | `episode-18` |
 
 To see the code of one episode: `git checkout episode-04`
 
