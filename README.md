@@ -37,6 +37,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 17 | How does an LR parser work? The automaton behind yacc and bison | `episode-17` |
 | 18 | LR(0) items, closure and goto: building an SLR parse table | `episode-18` |
 | 19 | LR(1) vs LALR(1): lookaheads in the items, and why yacc merges states | `episode-19` |
+| 20 | How yacc and bison work: y.output, conflicts and %left | `episode-20` |
 
 To see the code of one episode: `git checkout episode-04`
 
