@@ -18,6 +18,9 @@ From episode 27 on, `markdown/` holds a second translator built with the same to
 Markdown to HTML (`markdown/run.sh` translates `markdown/README.md`; `markdown/v1/` is the first
 version with its 13 conflicts).
 
+From episode 28 on, the calculator is a small language (comparisons, `if`/`else`, `while`, blocks,
+functions with recursion); `./run.sh -c` shows the calls.
+
 ## Episodes
 
 | Episode | Video | Tag |
@@ -49,6 +52,7 @@ version with its 13 conflicts).
 | 25 | Syntax-directed translation with recursive descent: attributes as parameters | `episode-25` |
 | 26 | Bottom-up translation in yacc: the value stack, mid-rule actions and $0 | `episode-26` |
 | 27 | Build a Markdown to HTML translator with lex and yacc | `episode-27` |
+| 28 | From calculator to programming language: if, while and functions with yacc | `episode-28` |
 
 To see the code of one episode: `git checkout episode-04`
 

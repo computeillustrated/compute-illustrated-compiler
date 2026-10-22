@@ -52,6 +52,13 @@ while IFS= read -r line; do
     if [[ $line =~ \<([A-Z]+),\ \"(.*)\"\> ]]; then
         name=${BASH_REMATCH[1]}; text=${BASH_REMATCH[2]}
         if [ "$name" = "NEWLINE" ]; then lookahead="NEWLINE"; else lookahead="$name[$text]"; fi
+        printed=1
+
+    # the parser reads a token; since episode 28 the lexer no longer prints
+    # it, so there is only the name, without its text
+    elif [[ $line =~ ^Reading\ a\ token:\ Next\ token\ is\ token\ ([A-Z]+) ]]; then
+        [ -z "$printed" ] && lookahead=${BASH_REMATCH[1]}
+        printed=""
 
     elif [[ $line == "Reading a token: Now at end of input." ]]; then
         lookahead="END"

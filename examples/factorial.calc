@@ -1,0 +1,9 @@
+x = 10 + 2 * 3
+int fact(int n) {
+    if (n <= 1) {
+        return 1
+    }
+    return n * fact(n - 1)
+}
+fact(5)
+y = fact(x / 4)

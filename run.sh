@@ -4,12 +4,18 @@
 #         ./run.sh input.txt       -> reads the input from a file
 #         ./run.sh -d [file]       -> the same with the parser's yydebug trace;
 #                                     the parser states are written to y.output
+#         ./run.sh -c [file]       -> prints every function call and return
 set -e
 cd "$(dirname "$0")"
 
 DEBUG=""
 if [ "$1" = "-d" ]; then
     DEBUG="-DYYDEBUG=1"
+    shift
+fi
+CALLS=""
+if [ "$1" = "-c" ]; then
+    CALLS="-c"
     shift
 fi
 
@@ -22,7 +28,7 @@ lex calc.l                         # lexer:  calc.l -> lex.yy.c
 cc $DEBUG -o calc y.tab.c lex.yy.c # compile both together
 
 if [ -n "$1" ]; then
-    ./calc < "$1"
+    ./calc $CALLS < "$1"
 else
-    ./calc
+    ./calc $CALLS
 fi
