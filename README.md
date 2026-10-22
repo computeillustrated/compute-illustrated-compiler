@@ -14,6 +14,10 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 ./stack.sh "x = 1 + 2 * 3"   # walks you through the shift/reduce steps
 ```
 
+From episode 27 on, `markdown/` holds a second translator built with the same tools: a tiny
+Markdown to HTML (`markdown/run.sh` translates `markdown/README.md`; `markdown/v1/` is the first
+version with its 13 conflicts).
+
 ## Episodes
 
 | Episode | Video | Tag |
@@ -44,6 +48,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 24 | S-attributed vs L-attributed definitions and translation schemes, explained | `episode-24` |
 | 25 | Syntax-directed translation with recursive descent: attributes as parameters | `episode-25` |
 | 26 | Bottom-up translation in yacc: the value stack, mid-rule actions and $0 | `episode-26` |
+| 27 | Build a Markdown to HTML translator with lex and yacc | `episode-27` |
 
 To see the code of one episode: `git checkout episode-04`
 
