@@ -25,6 +25,8 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 
 `ir/` (from episode 29, Python): a machine that runs the calculator's three-address code, the intermediate representations (syntax tree, DAG, postfix, quadruples, triples), a stack machine and procedure frames. See `ir/README.md`.
 
+`miniml/` (from episode 37, Python): Mini-ML, a tiny functional language with type inference, an interpreter with environments and closures, and the SECD machine. See `miniml/README.md`.
+
 ## Episodes
 
 | Episode | Video | Tag |
@@ -65,6 +67,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 34 | Generating three-address code: temporaries, type conversions and array addresses | `episode-34` |
 | 35 | How compilers translate if and while: jumps, labels and short-circuit evaluation | `episode-35` |
 | 36 | How function calls are compiled: param, call, return and stack frames | `episode-36` |
+| 37 | A first look at ML: functions are values | `episode-37` |
 
 To see the code of one episode: `git checkout episode-04`
 
