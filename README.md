@@ -64,6 +64,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 33 | How a compiler gives every variable an address: symbol tables, sizes and offsets | `episode-33` |
 | 34 | Generating three-address code: temporaries, type conversions and array addresses | `episode-34` |
 | 35 | How compilers translate if and while: jumps, labels and short-circuit evaluation | `episode-35` |
+| 36 | How function calls are compiled: param, call, return and stack frames | `episode-36` |
 
 To see the code of one episode: `git checkout episode-04`
 
