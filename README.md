@@ -56,6 +56,7 @@ functions with recursion); `./run.sh -c` shows the calls.
 | 27 | Build a Markdown to HTML translator with lex and yacc | `episode-27` |
 | 28 | From calculator to programming language: if, while and functions with yacc | `episode-28` |
 | 29 | Stack vs heap explained: where a running program keeps its variables | `episode-29` |
+| 30 | Stack frames explained: control links, access links and the display | `episode-30` |
 
 To see the code of one episode: `git checkout episode-04`
 
