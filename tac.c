@@ -290,13 +290,35 @@ char *gen_expr(struct node *n, int *type) {
 
 /* A condition jumps: to yes if it is true, to no if it is false. */
 void gen_cond(struct node *n, int yes, int no) {
-    int ta, tb;
-    char *a = gen_expr(n->a, &ta);
-    char *b = gen_expr(n->b, &tb);
-    a = widen(a, ta, ta == T_INT && tb == T_INT ? T_INT : T_FLOAT);
-    b = widen(b, tb, ta == T_INT && tb == T_INT ? T_INT : T_FLOAT);
-    putcode("if %s %s %s goto L%d", a, cop_name(n->op), b, yes);
-    putcode("goto L%d", no);
+    int ta, tb, l;
+    char *a, *b;
+    switch (n->kind) {
+    case N_COMPARE:
+        a = gen_expr(n->a, &ta);
+        b = gen_expr(n->b, &tb);
+        a = widen(a, ta, ta == T_INT && tb == T_INT ? T_INT : T_FLOAT);
+        b = widen(b, tb, ta == T_INT && tb == T_INT ? T_INT : T_FLOAT);
+        putcode("if %s %s %s goto L%d", a, cop_name(n->op), b, yes);
+        putcode("goto L%d", no);
+        break;
+    case N_AND:                     /* a false: the whole thing is false */
+        l = newlabel();
+        gen_cond(n->a, l, no);
+        putlabel(l);
+        gen_cond(n->b, yes, no);
+        break;
+    case N_OR:                      /* a true: the whole thing is true */
+        l = newlabel();
+        gen_cond(n->a, yes, l);
+        putlabel(l);
+        gen_cond(n->b, yes, no);
+        break;
+    case N_NOT:                     /* swap the two labels */
+        gen_cond(n->a, no, yes);
+        break;
+    default:
+        break;
+    }
 }
 
 void gen_statements(struct node *list);

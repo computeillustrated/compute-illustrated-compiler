@@ -10,6 +10,8 @@
  *
  * Besides int and float variables there are one-dimensional arrays:
  * int a[10] declares one, a[i] reads an element, a[i] = ... writes one.
+ * Conditions can be combined with and, or, not; like in C, the right
+ * side of and/or is only evaluated when it still matters.
  *
  * The tree can also be translated instead of run: ./calc -t prints
  * three-address code, ./calc -s the symbol tables with sizes and
@@ -33,6 +35,7 @@ void yyerror(const char *s) {
  * The tree: one node per expression or statement.
  * --------------------------------------------------------------- */
 enum kind { N_NUM, N_VAR, N_INDEX, N_BINOP, N_COMPARE, N_CALL,        /* expressions */
+            N_AND, N_OR, N_NOT,                                     /* conditions  */
             N_ASSIGN, N_DECL, N_IF, N_WHILE, N_RETURN, N_EXPR };    /* statements  */
 
 struct node {
@@ -300,6 +303,18 @@ struct value eval(struct node *n) {
         if (!e) return error_value;
         v.type = e->type; v.num = e->elems[(int) v.num];
         return v;
+    case N_AND:                          /* b only if a is true */
+        v = eval(n->a);
+        if (v.type == T_ERROR || v.num == 0) return v;
+        return eval(n->b);
+    case N_OR:                           /* b only if a is false */
+        v = eval(n->a);
+        if (v.type == T_ERROR || v.num != 0) return v;
+        return eval(n->b);
+    case N_NOT:
+        v = eval(n->a);
+        if (v.type != T_ERROR) v.num = (v.num == 0);
+        return v;
     default:
         return error_value;
     }
@@ -424,11 +439,11 @@ void top_level(struct node *n) {
 %token <op>   COMPARE    /* == != <= >= < >                         */
 %token PLUS MINUS ASSIGN NEWLINE TIMES DIVIDE LPAREN RPAREN COMMA /* no value */
 %token LBRACE RBRACE IF ELSE WHILE RETURN                         /* no value */
-%token LBRACKET RBRACKET                                          /* no value */
+%token LBRACKET RBRACKET AND OR NOT                               /* no value */
 
 /* Every rule now delivers a node instead of a value. */
 %type  <node> statement statements block names params param_list args arg_list
-%type  <node> condition expr term factor name
+%type  <node> condition cond_term cond_factor expr term factor name
 
 /* ================================================================
  * PART 2: GRAMMAR RULES
@@ -497,9 +512,18 @@ name    : IDENT              { $$ = node(N_VAR, 0, 0, 0); $$->name = $1; }
                                $$->len = $3.type == T_INT && $3.num >= 1 ? (int) $3.num : 1; }
         ;
 
-/* Comparisons only in conditions, so expr, term and factor stay as they were. */
-condition : expr COMPARE expr  { $$ = node(N_COMPARE, $1, $3, 0); $$->op = $2; }
-          ;
+/* Comparisons only in conditions, so expr, term and factor stay as they were.
+ * or, and, not with the usual precedence (not before and before or),
+ * built like expr, term, factor. No parentheses around conditions. */
+condition   : condition OR cond_term     { $$ = node(N_OR, $1, $3, 0); }
+            | cond_term
+            ;
+cond_term   : cond_term AND cond_factor  { $$ = node(N_AND, $1, $3, 0); }
+            | cond_factor
+            ;
+cond_factor : NOT cond_factor            { $$ = node(N_NOT, $2, 0, 0); }
+            | expr COMPARE expr          { $$ = node(N_COMPARE, $1, $3, 0); $$->op = $2; }
+            ;
 
 /* The same rules as before, only the actions build nodes:
  * before:  $$ = arith($1, '+', $3);   (a value)

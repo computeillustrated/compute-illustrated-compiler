@@ -20,6 +20,9 @@
 "else"         { return ELSE; }
 "while"        { return WHILE; }
 "return"       { return RETURN; }
+"and"          { return AND; }
+"or"           { return OR; }
+"not"          { return NOT; }
     /* The keywords come BEFORE the rule for names: "while" matches both,
      * with the same length, and then the earlier rule wins.
      * "whiley" is longer as a name, so it stays an IDENT. */
