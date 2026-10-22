@@ -70,6 +70,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 37 | A first look at ML: functions are values | `episode-37` |
 | 38 | Type inference: how a compiler finds types nobody wrote (unification, polymorphism) | `episode-38` |
 | 39 | Interpreting Mini-ML: environments and closures | `episode-39` |
+| 40 | The SECD machine: how functional code runs, closures and recursion | `episode-40` |
 
 To see the code of one episode: `git checkout episode-04`
 
