@@ -74,6 +74,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 39 | Interpreting Mini-ML: environments and closures | `episode-39` |
 | 40 | The SECD machine: how functional code runs, closures and recursion | `episode-40` |
 | 41 | Basic blocks and flow graphs: how a compiler sees the shape of your code | `episode-41` |
+| 42 | Compiler optimization inside a basic block: constant folding, copy propagation, inlining and the DAG | `episode-42` |
 
 To see the code of one episode: `git checkout episode-04`
 
