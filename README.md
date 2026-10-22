@@ -42,6 +42,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 22 | Semantic analysis explained: errors a parser can't catch | `episode-22` |
 | 23 | Attribute grammars explained: synthesized vs inherited attributes | `episode-23` |
 | 24 | S-attributed vs L-attributed definitions and translation schemes, explained | `episode-24` |
+| 25 | Syntax-directed translation with recursive descent: attributes as parameters | `episode-25` |
 
 To see the code of one episode: `git checkout episode-04`
 
