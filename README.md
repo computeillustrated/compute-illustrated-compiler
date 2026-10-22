@@ -69,6 +69,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 36 | How function calls are compiled: param, call, return and stack frames | `episode-36` |
 | 37 | A first look at ML: functions are values | `episode-37` |
 | 38 | Type inference: how a compiler finds types nobody wrote (unification, polymorphism) | `episode-38` |
+| 39 | Interpreting Mini-ML: environments and closures | `episode-39` |
 
 To see the code of one episode: `git checkout episode-04`
 
