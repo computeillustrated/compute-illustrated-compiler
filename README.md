@@ -79,6 +79,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 44 | Machine-dependent optimization: registers, special instructions and the peephole | `episode-44` |
 | 45 | Data-flow analysis: how a compiler knows an optimization is safe (gen, kill, in, out) | `episode-45` |
 | 46 | How a compiler assigns registers: getreg, descriptors and spilling | `episode-46` |
+| 47 | How a compiler works, for real: one line from source code to machine code | `episode-47` |
 
 To see the code of one episode: `git checkout episode-04`
 
