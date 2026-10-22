@@ -1,0 +1,9 @@
+int a, b, p, q
+a = 4
+b = 7
+if (a < b) {
+    p = a * b - 1
+} else {
+    q = a * b + 2
+}
+a * b

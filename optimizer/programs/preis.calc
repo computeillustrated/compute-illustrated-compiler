@@ -1,0 +1,8 @@
+int price(int n, int c) {
+    if (n > 10) {
+        return n * c - 5
+    }
+    return n * c
+}
+price(12, 3)
+price(4, 3)

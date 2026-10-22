@@ -1,0 +1,7 @@
+int debug, x, y
+debug = 0
+x = 10 + 2 * 3
+if (debug == 1) {
+    x
+}
+y = x * 2

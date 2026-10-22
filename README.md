@@ -27,6 +27,8 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 
 `miniml/` (from episode 37, Python): Mini-ML, a tiny functional language with type inference, an interpreter with environments and closures, and the SECD machine. See `miniml/README.md`.
 
+`optimizer/` (from episode 41, Python): basic blocks and flow graphs, local and loop optimizations, data-flow analysis, code generation with register allocation and a peephole optimizer, all working on the calculator's real three-address code. See `optimizer/README.md`.
+
 ## Episodes
 
 | Episode | Video | Tag |
@@ -71,6 +73,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 38 | Type inference: how a compiler finds types nobody wrote (unification, polymorphism) | `episode-38` |
 | 39 | Interpreting Mini-ML: environments and closures | `episode-39` |
 | 40 | The SECD machine: how functional code runs, closures and recursion | `episode-40` |
+| 41 | Basic blocks and flow graphs: how a compiler sees the shape of your code | `episode-41` |
 
 To see the code of one episode: `git checkout episode-04`
 

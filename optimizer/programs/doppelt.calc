@@ -1,0 +1,5 @@
+int twice(int a) {
+    return a * 2
+}
+x = 10 + 2 * 3
+y = twice(x)
