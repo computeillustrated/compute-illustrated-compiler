@@ -20,6 +20,8 @@ version with its 13 conflicts).
 
 From episode 28 on, the calculator is a small language (comparisons, `if`/`else`, `while`, blocks,
 functions with recursion); `./run.sh -c` shows the calls.
+From episode 31 on, `./run.sh -t` prints three-address code instead of running the program, and
+`./run.sh -s` prints the symbol tables with offsets.
 
 `ir/` (from episode 29, Python): a machine that runs the calculator's three-address code, the intermediate representations (syntax tree, DAG, postfix, quadruples, triples), a stack machine and procedure frames. See `ir/README.md`.
 
@@ -57,6 +59,7 @@ functions with recursion); `./run.sh -c` shows the calls.
 | 28 | From calculator to programming language: if, while and functions with yacc | `episode-28` |
 | 29 | Stack vs heap explained: where a running program keeps its variables | `episode-29` |
 | 30 | Stack frames explained: control links, access links and the display | `episode-30` |
+| 31 | Intermediate code explained: AST, DAG, postfix and three-address code | `episode-31` |
 
 To see the code of one episode: `git checkout episode-04`
 

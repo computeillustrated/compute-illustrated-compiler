@@ -7,6 +7,10 @@
  * only runs when it's called, and one branch of an if never runs.
  * So every rule builds a node of a tree, and the tree is run
  * afterwards.
+ *
+ * The tree can also be translated instead of run: ./calc -t prints
+ * three-address code, ./calc -s the symbol tables with sizes and
+ * offsets (the translator is in tac.c, included at the end of this file).
  * ================================================================ */
 %{
 #include <stdio.h>    /* for printf and fprintf */
@@ -315,9 +319,18 @@ void run(struct node *list) {
         execute(list);
 }
 
+/* With -t or -s nothing runs; the statements of the top level
+ * are collected and translated at the end (see tac.c). */
+int translate = 0;
+struct node *main_statements = NULL;
+
 /* A statement typed at the top level runs right away, as before. */
 void top_level(struct node *n) {
     if (!n) return;
+    if (translate) {
+        main_statements = append(main_statements, n);
+        return;
+    }
     if (n->kind == N_RETURN) {
         fprintf(stderr, "error: return outside a function\n");
         return;
@@ -448,15 +461,29 @@ arg_list : arg_list COMMA expr  { $$ = append($1, $3); }
  * PART 3: ADDITIONAL C CODE
  * ================================================================ */
 
+/* The translator into three-address code. */
+#include "tac.c"
+
 int main(int argc, char **argv) {
+    int show_code = 0, show_symbols = 0;
     /* Unbuffered stdout, so that our output and the error messages
      * (stderr) appear in the right order. */
     setbuf(stdout, NULL);
-    /* ./calc -c (or ./run.sh -c): print every call and return. */
-    show_calls = argc > 1 && strcmp(argv[1], "-c") == 0;
+    /* ./calc -c (or ./run.sh -c): print every call and return.
+     * ./calc -t prints three-address code, ./calc -s the symbol
+     * tables; both together print the tables first. */
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-c") == 0) show_calls = 1;
+        else if (strcmp(argv[i], "-t") == 0) show_code = 1;
+        else if (strcmp(argv[i], "-s") == 0) show_symbols = 1;
+    }
+    translate = show_code || show_symbols;
 #if YYDEBUG
     /* Only when compiled with -DYYDEBUG=1 (./run.sh -d). */
     yydebug = 1;
 #endif
-    return yyparse();
+    int status = yyparse();
+    if (status == 0 && translate)
+        status = translate_program(show_symbols, show_code);
+    return status;
 }
