@@ -1,0 +1,23 @@
+int a[5]
+int i, j, n, h
+a[0] = 7
+a[1] = 3
+a[2] = 9
+a[3] = 1
+a[4] = 5
+n = 5
+i = 0
+while (i < n - 1) {
+    j = 0
+    while (j < n - 1 - i) {
+        if (a[j] > a[j + 1]) {
+            h = a[j]
+            a[j] = a[j + 1]
+            a[j + 1] = h
+        }
+        j = j + 1
+    }
+    i = i + 1
+}
+a[0]
+a[4]

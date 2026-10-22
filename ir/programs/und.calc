@@ -1,0 +1,10 @@
+a = 5
+b = 2
+c = 4
+d = 3
+if (a < b and c < d) {
+    r = 1
+} else {
+    r = 0
+}
+r

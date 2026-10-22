@@ -1,0 +1,8 @@
+int a[4]
+int i, s
+i = 0
+while (i < 4) {
+    a[i] = i * i
+    i = i + 1
+}
+s = a[1] + a[3]

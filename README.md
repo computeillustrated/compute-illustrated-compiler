@@ -21,6 +21,8 @@ version with its 13 conflicts).
 From episode 28 on, the calculator is a small language (comparisons, `if`/`else`, `while`, blocks,
 functions with recursion); `./run.sh -c` shows the calls.
 
+`ir/` (from episode 29, Python): a machine that runs the calculator's three-address code, the intermediate representations (syntax tree, DAG, postfix, quadruples, triples), a stack machine and procedure frames. See `ir/README.md`.
+
 ## Episodes
 
 | Episode | Video | Tag |
@@ -53,6 +55,7 @@ functions with recursion); `./run.sh -c` shows the calls.
 | 26 | Bottom-up translation in yacc: the value stack, mid-rule actions and $0 | `episode-26` |
 | 27 | Build a Markdown to HTML translator with lex and yacc | `episode-27` |
 | 28 | From calculator to programming language: if, while and functions with yacc | `episode-28` |
+| 29 | Stack vs heap explained: where a running program keeps its variables | `episode-29` |
 
 To see the code of one episode: `git checkout episode-04`
 

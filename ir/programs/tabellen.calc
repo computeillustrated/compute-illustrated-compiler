@@ -1,0 +1,9 @@
+int n
+float r, s
+n = 3
+int triple(int a) {
+    int s
+    s = a * n
+    return s
+}
+triple(5)

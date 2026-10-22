@@ -1,0 +1,22 @@
+a = 1
+b = 2
+c = 4
+d = 3
+if (a < b and c < d) {
+    r = 1
+} else {
+    r = 0
+}
+r
+if (a < b or c < d) {
+    q = 1
+} else {
+    q = 0
+}
+q
+if (not a < b) {
+    p = 1
+} else {
+    p = 0
+}
+p
