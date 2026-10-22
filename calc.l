@@ -42,6 +42,8 @@
 ")"            { return RPAREN; }
 "{"            { return LBRACE; }
 "}"            { return RBRACE; }
+"["            { return LBRACKET; }
+"]"            { return RBRACKET; }
 ","            { return COMMA; }
 \n             { return NEWLINE; }
 [ \t]          { /* skip spaces and tabs */ }

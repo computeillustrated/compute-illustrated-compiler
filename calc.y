@@ -8,6 +8,9 @@
  * So every rule builds a node of a tree, and the tree is run
  * afterwards.
  *
+ * Besides int and float variables there are one-dimensional arrays:
+ * int a[10] declares one, a[i] reads an element, a[i] = ... writes one.
+ *
  * The tree can also be translated instead of run: ./calc -t prints
  * three-address code, ./calc -s the symbol tables with sizes and
  * offsets (the translator is in tac.c, included at the end of this file).
@@ -29,7 +32,7 @@ void yyerror(const char *s) {
 /* ---------------------------------------------------------------
  * The tree: one node per expression or statement.
  * --------------------------------------------------------------- */
-enum kind { N_NUM, N_VAR, N_BINOP, N_COMPARE, N_CALL,                 /* expressions */
+enum kind { N_NUM, N_VAR, N_INDEX, N_BINOP, N_COMPARE, N_CALL,        /* expressions */
             N_ASSIGN, N_DECL, N_IF, N_WHILE, N_RETURN, N_EXPR };    /* statements  */
 
 struct node {
@@ -38,7 +41,9 @@ struct node {
     struct value val;     /* N_NUM: the number */
     char  *name;          /* variable or function name */
     int    type;          /* declared variables and parameters */
-    struct node *a, *b, *c;  /* operands; or condition, then-block, else-block */
+    int    len;           /* declared arrays: number of elements (0: no array) */
+    struct node *a, *b, *c;  /* operands; or condition, then-block, else-block;
+                                N_ASSIGN: a = value, b = index (only for a[i] = ...) */
     struct node *next;    /* the next statement in a block, the next argument */
 };
 
@@ -67,6 +72,8 @@ struct entry {
     int    type;       /* T_INT or T_FLOAT */
     int    has_value;  /* 0 after "int a", 1 after the first assignment */
     double num;
+    int    len;        /* arrays only: number of elements */
+    double *elems;     /* arrays only: the elements (start as 0) */
 };
 struct frame {
     struct entry vars[50];
@@ -93,6 +100,7 @@ struct entry *lookup(const char *name) {
 struct entry *insert(char *name, int type) {
     struct entry *e = &current->vars[current->n++];
     e->name = name; e->type = type; e->has_value = 0;
+    e->len = 0; e->elems = NULL;
     return e;
 }
 
@@ -165,6 +173,31 @@ struct value compare(struct value a, int op, struct value b) {
     case 'N': r.num = a.num != b.num; break;
     }
     return r;
+}
+
+/* a[i]: finds the array and computes the index; the index is put
+ * into *index. NULL (with a message) if something is wrong. */
+struct entry *element(const char *name, struct node *index_expr, struct value *index) {
+    struct entry *e = lookup(name);
+    if (!e) {
+        fprintf(stderr, "error: %s is not declared\n", name);
+        return NULL;
+    }
+    if (!e->len) {
+        fprintf(stderr, "error: %s is not an array\n", name);
+        return NULL;
+    }
+    *index = eval(index_expr);
+    if (index->type == T_ERROR) return NULL;
+    if (index->type != T_INT) {
+        fprintf(stderr, "error: index of %s must be int\n", name);
+        return NULL;
+    }
+    if (index->num < 0 || index->num >= e->len) {
+        fprintf(stderr, "error: index %g out of range for %s\n", index->num, name);
+        return NULL;
+    }
+    return e;
 }
 
 /* Stores v in e; int into float is fine, float into int is an error. */
@@ -246,6 +279,10 @@ struct value eval(struct node *n) {
             fprintf(stderr, "error: %s is not declared\n", n->name);
             return error_value;
         }
+        if (e->len) {
+            fprintf(stderr, "error: %s is an array\n", n->name);
+            return error_value;
+        }
         if (!e->has_value) {
             fprintf(stderr, "error: %s has no value yet\n", n->name);
             return error_value;
@@ -258,6 +295,11 @@ struct value eval(struct node *n) {
         return compare(eval(n->a), n->op, eval(n->b));
     case N_CALL:
         return call(n);
+    case N_INDEX:                        /* a[i] */
+        e = element(n->name, n->a, &v);
+        if (!e) return error_value;
+        v.type = e->type; v.num = e->elems[(int) v.num];
+        return v;
     default:
         return error_value;
     }
@@ -271,10 +313,28 @@ void execute(struct node *n) {
     case N_ASSIGN: {
         int show = echo;
         echo = 0;
+        if (n->b) {                            /* a[i] = value */
+            struct value i;
+            if (!(e = element(n->name, n->b, &i))) break;
+            v = eval(n->a);
+            if (v.type == T_ERROR) break;
+            if (e->type == T_INT && v.type == T_FLOAT) {
+                fprintf(stderr, "error: cannot assign float to int %s\n", e->name);
+                break;
+            }
+            e->elems[(int) i.num] = v.num;
+            if (show)
+                printf("%s[%g] = %g\n", n->name, i.num, v.num);
+            break;
+        }
         v = eval(n->a);
         if (v.type == T_ERROR) break;
         e = lookup(n->name);
         if (!e) e = insert(n->name, v.type);   /* first assignment declares it, in the current table */
+        if (e->len) {
+            fprintf(stderr, "error: %s is an array\n", n->name);
+            break;
+        }
         if (store(e, v) && show)
             printf("%s = %g\n", n->name, e->num);
         break;
@@ -283,8 +343,10 @@ void execute(struct node *n) {
         for (n = n->a; n; n = n->next) {
             if (find(current, n->name))
                 fprintf(stderr, "error: %s is already declared\n", n->name);
-            else
-                insert(n->name, n->type);
+            else if ((e = insert(n->name, n->type)) && n->len) {   /* an array */
+                e->len = n->len;
+                e->elems = calloc(n->len, sizeof(double));
+            }
         }
         break;
     case N_IF:
@@ -362,10 +424,11 @@ void top_level(struct node *n) {
 %token <op>   COMPARE    /* == != <= >= < >                         */
 %token PLUS MINUS ASSIGN NEWLINE TIMES DIVIDE LPAREN RPAREN COMMA /* no value */
 %token LBRACE RBRACE IF ELSE WHILE RETURN                         /* no value */
+%token LBRACKET RBRACKET                                          /* no value */
 
 /* Every rule now delivers a node instead of a value. */
 %type  <node> statement statements block names params param_list args arg_list
-%type  <node> condition expr term factor
+%type  <node> condition expr term factor name
 
 /* ================================================================
  * PART 2: GRAMMAR RULES
@@ -400,6 +463,8 @@ param_list : param_list COMMA TYPE IDENT  { struct node *p = node(N_VAR, 0, 0, 0
  * Braces are required, and else stays on the line of the closing brace,
  * so it's always clear which if an else belongs to: no dangling else. */
 statement : IDENT ASSIGN expr NEWLINE     { $$ = node(N_ASSIGN, $3, 0, 0); $$->name = $1; }
+          | IDENT LBRACKET expr RBRACKET ASSIGN expr NEWLINE
+                                          { $$ = node(N_ASSIGN, $6, $3, 0); $$->name = $1; }
           | TYPE names NEWLINE            { $$ = node(N_DECL, $2, 0, 0); }
           | IF LPAREN condition RPAREN block NEWLINE
                                           { $$ = node(N_IF, $3, $5, 0); }
@@ -419,10 +484,17 @@ statements : /* empty */                  { $$ = NULL; }
            | statements statement         { $$ = append($1, $2); }
            ;
 
-/* The declared type sits on the stack just left of names: $<type>0. */
-names   : names COMMA IDENT  { struct node *d = node(N_VAR, 0, 0, 0);
-                               d->name = $3; d->type = $<type>0; $$ = append($1, d); }
-        | IDENT              { $$ = node(N_VAR, 0, 0, 0); $$->name = $1; $$->type = $<type>0; }
+/* The declared type sits on the stack just left of names: $<type>0.
+ * A name is a variable or an array: "int i, a[10]". */
+names   : names COMMA name   { $$ = append($1, $3); $3->type = $<type>0; }
+        | name               { $$ = $1; $$->type = $<type>0; }
+        ;
+name    : IDENT              { $$ = node(N_VAR, 0, 0, 0); $$->name = $1; }
+        | IDENT LBRACKET NUMBER RBRACKET
+                             { $$ = node(N_VAR, 0, 0, 0); $$->name = $1;
+                               if ($3.type != T_INT || $3.num < 1)
+                                   fprintf(stderr, "error: size of %s must be a positive int\n", $1);
+                               $$->len = $3.type == T_INT && $3.num >= 1 ? (int) $3.num : 1; }
         ;
 
 /* Comparisons only in conditions, so expr, term and factor stay as they were. */
@@ -442,10 +514,12 @@ term : term TIMES factor   { $$ = node(N_BINOP, $1, $3, 0); $$->op = '*'; }
      | factor
      ;
 
-/* A call can go anywhere a number can. */
+/* A call and an array element can go anywhere a number can. */
 factor : NUMBER                     { $$ = node(N_NUM, 0, 0, 0); $$->val = $1; }
        | IDENT                      { $$ = node(N_VAR, 0, 0, 0); $$->name = $1; }
        | IDENT LPAREN args RPAREN   { $$ = node(N_CALL, $3, 0, 0); $$->name = $1; }
+       | IDENT LBRACKET expr RBRACKET
+                                    { $$ = node(N_INDEX, $3, 0, 0); $$->name = $1; }
        | LPAREN expr RPAREN         { $$ = $2; }
        ;
 

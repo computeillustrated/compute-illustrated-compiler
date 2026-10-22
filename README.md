@@ -62,6 +62,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 31 | Intermediate code explained: AST, DAG, postfix and three-address code | `episode-31` |
 | 32 | How a stack machine runs code: postfix vs. three-address code, step by step | `episode-32` |
 | 33 | How a compiler gives every variable an address: symbol tables, sizes and offsets | `episode-33` |
+| 34 | Generating three-address code: temporaries, type conversions and array addresses | `episode-34` |
 
 To see the code of one episode: `git checkout episode-04`
 

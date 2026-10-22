@@ -13,11 +13,12 @@
  * to new labels L1, L2, ...; a condition gets two labels, where to go
  * when it is true and where to go when it is false.
  *
- * Sizes as in a classic 32-bit layout: int and float 4 bytes each.
- * The top level gets offsets from 0. A function frame starts with
- * 16 bytes of bookkeeping (result, saved pc, saved depth, saved
- * display), so parameters start at offset 16. After the variables
- * come the temporaries.
+ * Sizes as in a classic 32-bit layout: int and float 4 bytes each,
+ * aligned to 4; an array has n * 4 bytes, rounded up to a multiple
+ * of 8, aligned to 8. The top level gets offsets from 0. A function
+ * frame starts with 16 bytes of bookkeeping (result, saved pc, saved
+ * depth, saved display), so parameters start at offset 16. After the
+ * variables come the temporaries.
  * ================================================================ */
 #include <stdarg.h>   /* for putcode(fmt, ...) */
 
@@ -27,8 +28,9 @@
 enum sym_kind { S_VAR, S_PARAM, S_TEMP };
 struct sym {
     char *name;
-    int   type;      /* T_INT or T_FLOAT */
+    int   type;      /* T_INT or T_FLOAT; for arrays the element type */
     int   kind;      /* S_VAR, S_PARAM, S_TEMP */
+    int   len;       /* arrays: number of elements, else 0 */
     int   size;      /* bytes */
     int   offset;    /* bytes from the start of the frame */
 };
@@ -74,10 +76,12 @@ struct sym *find_name(const char *name) {
     return s;
 }
 
-struct sym *enter_sym(struct scope *s, char *name, int type, int kind) {
+struct sym *enter_sym(struct scope *s, char *name, int type, int kind, int len) {
     struct sym *e = &s->syms[s->n++];
-    e->name = name; e->type = type; e->kind = kind;
-    e->size = 4;
+    int alignment = len ? 8 : 4;
+    e->name = name; e->type = type; e->kind = kind; e->len = len;
+    e->size = len ? align_up(4 * len, 8) : 4;
+    s->offset = align_up(s->offset, alignment);
     e->offset = s->offset;
     s->offset += e->size;
     if (kind == S_VAR) s->has_vars = 1;
@@ -99,7 +103,7 @@ int reserved(const char *name) {
 char *newtemp(int type) {
     char buf[16];
     snprintf(buf, sizeof buf, "t%d", ++ntemps);
-    return enter_sym(scope, strdup(buf), type, S_TEMP)->name;
+    return enter_sym(scope, strdup(buf), type, S_TEMP, 0)->name;
 }
 int newlabel(void) { return ++nlabels; }
 
@@ -162,13 +166,13 @@ void collect(struct node *list) {
             for (struct node *d = n->a; d; d = d->next) {
                 if (reserved(d->name)) tac_error("%s is reserved for temporaries and labels", d->name);
                 else if (find_sym(scope, d->name)) tac_error("%s is already declared", d->name);
-                else enter_sym(scope, d->name, d->type, S_VAR);
+                else enter_sym(scope, d->name, d->type, S_VAR, d->len);
             }
             break;
         case N_ASSIGN:
-            if (!find_name(n->name)) {
+            if (!n->b && !find_name(n->name)) {
                 if (reserved(n->name)) tac_error("%s is reserved for temporaries and labels", n->name);
-                else enter_sym(scope, n->name, type_of(n->a), S_VAR);
+                else enter_sym(scope, n->name, type_of(n->a), S_VAR, 0);
             }
             break;
         case N_IF:
@@ -190,7 +194,8 @@ int type_of(struct node *n) {
     struct function *f;
     switch (n->kind) {
     case N_NUM:   return n->val.type;
-    case N_VAR:   return (s = find_name(n->name)) ? s->type : T_INT;
+    case N_VAR:
+    case N_INDEX: return (s = find_name(n->name)) ? s->type : T_INT;
     case N_CALL:  return (f = find_function(n->name)) ? f->type : T_INT;
     case N_BINOP: return type_of(n->a) == T_INT && type_of(n->b) == T_INT ? T_INT : T_FLOAT;
     default:      return T_INT;
@@ -202,6 +207,20 @@ int type_of(struct node *n) {
  * its type; the code for it is already printed.
  * --------------------------------------------------------------- */
 char *gen_expr(struct node *n, int *type);
+
+/* a[i]: the byte offset of the element, 4 * i, in a new temporary. */
+char *gen_offset(char *name, struct node *index, struct sym **array) {
+    int t;
+    struct sym *s = find_name(name);
+    if (!s) { tac_error("%s is not declared", name); return "?"; }
+    if (!s->len) { tac_error("%s is not an array", name); return "?"; }
+    *array = s;
+    char *i = gen_expr(index, &t);
+    if (t != T_INT) tac_error("index of %s must be int", name);
+    char *offset = newtemp(T_INT);
+    putcode("%s := 4 * %s", offset, i);
+    return offset;
+}
 
 /* p(e1, ..., en): first the code for all arguments, then all params,
  * so that a call inside an argument can't mix up the params. */
@@ -241,8 +260,16 @@ char *gen_expr(struct node *n, int *type) {
     case N_VAR:
         s = find_name(n->name);
         if (!s) { tac_error("%s is not declared", n->name); *type = T_INT; return n->name; }
+        if (s->len) tac_error("%s is an array", n->name);
         *type = s->type;
         return n->name;
+    case N_INDEX:
+        s = NULL;
+        a = gen_offset(n->name, n->a, &s);
+        *type = s ? s->type : T_INT;
+        t = newtemp(*type);
+        putcode("%s := %s[%s]", t, n->name, a);
+        return t;
     case N_BINOP:
         a = gen_expr(n->a, &ta);
         b = gen_expr(n->b, &tb);
@@ -277,15 +304,25 @@ void gen_statements(struct node *list);
 void gen_statement(struct node *n) {
     struct sym *s;
     int t, yes, no, next, start;
-    char *place;
+    char *place, *offset;
     switch (n->kind) {
     case N_ASSIGN:
-        s = find_name(n->name);
-        place = gen_expr(n->a, &t);
+        if (n->b) {                                /* a[i] := value */
+            s = NULL;
+            offset = gen_offset(n->name, n->b, &s);
+            place = gen_expr(n->a, &t);
+        } else {
+            s = find_name(n->name);
+            offset = NULL;
+            place = gen_expr(n->a, &t);
+            if (s && s->len) tac_error("%s is an array", n->name);
+        }
         if (!s) break;
         if (s->type == T_INT && t == T_FLOAT)
             tac_error("cannot assign float to int %s", n->name);
-        putcode("%s := %s", n->name, widen(place, t, s->type));
+        place = widen(place, t, s->type);
+        if (offset) putcode("%s[%s] := %s", n->name, offset, place);
+        else        putcode("%s := %s", n->name, place);
         break;
     case N_DECL:
         break;                                     /* only the symbol table */
@@ -346,7 +383,10 @@ void print_scope(struct scope *s) {
     printf("#   %-8s %-9s %-6s %4s %6s\n", "name", "type", "kind", "size", "offset");
     for (int i = 0; i < s->n; i++) {
         struct sym *e = &s->syms[i];
-        printf("#   %-8s %-9s %-6s %4d %6d\n", e->name, type_name(e->type),
+        char type[20];
+        if (e->len) snprintf(type, sizeof type, "%s[%d]", type_name(e->type), e->len);
+        else        snprintf(type, sizeof type, "%s", type_name(e->type));
+        printf("#   %-8s %-9s %-6s %4d %6d\n", e->name, type,
                e->kind == S_VAR ? "var" : e->kind == S_PARAM ? "param" : "temp", e->size, e->offset);
     }
 }
@@ -370,7 +410,7 @@ int translate_program(int show_symbols, int show_code) {
         s->name = f->name; s->depth = 1;
         s->offset = 16;                     /* result, saved pc, depth, display */
         for (struct node *p = f->params; p; p = p->next)
-            enter_sym(s, p->name, p->type, S_PARAM);
+            enter_sym(s, p->name, p->type, S_PARAM, 0);
         collect(f->body);
         end_of_variables(s);
     }
