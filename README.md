@@ -77,6 +77,7 @@ From episode 31 on, `./run.sh -t` prints three-address code instead of running t
 | 42 | Compiler optimization inside a basic block: constant folding, copy propagation, inlining and the DAG | `episode-42` |
 | 43 | How compilers optimize loops: code motion, induction variables, unrolling and dead code | `episode-43` |
 | 44 | Machine-dependent optimization: registers, special instructions and the peephole | `episode-44` |
+| 45 | Data-flow analysis: how a compiler knows an optimization is safe (gen, kill, in, out) | `episode-45` |
 
 To see the code of one episode: `git checkout episode-04`
 
