@@ -40,6 +40,7 @@ You need `lex` (flex), `yacc` (bison) and a C compiler.
 | 20 | How yacc and bison work: y.output, conflicts and %left | `episode-20` |
 | 21 | LL vs LR parsing: which is more powerful, and why? | `episode-21` |
 | 22 | Semantic analysis explained: errors a parser can't catch | `episode-22` |
+| 23 | Attribute grammars explained: synthesized vs inherited attributes | `episode-23` |
 
 To see the code of one episode: `git checkout episode-04`
 
